@@ -136,28 +136,30 @@
                 ship.thrust.y -= SHIP_THRUST * Math.sin(ship.a) / FPS; 
 
                 //draw thruster
-                ctx.fillStyle = 'red';
-                ctx.strokeStyle = "yellow";
-                ctx.lineWidth = SHIP_SIZE / 10; 
-                ctx.beginPath(); 
-                ctx.moveTo(
-                    //rear left
-                    ship.x - ship.r * (2/3 * Math.cos(ship.a) + 0.5 * Math.sin(ship.a)),
-                    ship.y + ship.r * (2/3 * Math.sin(ship.a) - 0.5 * Math.cos(ship.a))
-                );
-                ctx.lineTo( 
-                    //rear center
-                    ship.x - ship.r * 6/3 * Math.cos(ship.a),
-                    ship.y + ship.r * 6/3 * Math.sin(ship.a)
-                ); 
-                ctx.lineTo( 
-                    //rear right 
-                    ship.x - ship.r * (2/3 * Math.cos(ship.a) - 0.5 * Math.sin(ship.a)),
-                    ship.y + ship.r * (2/3 * Math.sin(ship.a) + 0.5 * Math.cos(ship.a))
-                ); 
-                ctx.closePath(); //completes triangle
-                ctx.fill();
-                ctx.stroke(); 
+                if(!exploding){
+                    ctx.fillStyle = 'red';
+                    ctx.strokeStyle = "yellow";
+                    ctx.lineWidth = SHIP_SIZE / 10; 
+                    ctx.beginPath(); 
+                    ctx.moveTo(
+                        //rear left
+                        ship.x - ship.r * (2/3 * Math.cos(ship.a) + 0.5 * Math.sin(ship.a)),
+                        ship.y + ship.r * (2/3 * Math.sin(ship.a) - 0.5 * Math.cos(ship.a))
+                    );
+                    ctx.lineTo( 
+                        //rear center
+                        ship.x - ship.r * 6/3 * Math.cos(ship.a),
+                        ship.y + ship.r * 6/3 * Math.sin(ship.a)
+                    ); 
+                    ctx.lineTo( 
+                        //rear right 
+                        ship.x - ship.r * (2/3 * Math.cos(ship.a) - 0.5 * Math.sin(ship.a)),
+                        ship.y + ship.r * (2/3 * Math.sin(ship.a) + 0.5 * Math.cos(ship.a))
+                    ); 
+                    ctx.closePath(); //completes triangle
+                    ctx.fill();
+                    ctx.stroke(); 
+                }
 
 
             } else {
@@ -273,18 +275,20 @@
             ctx.fillRect(ship.x -1, ship.y - 1, 2, 2); 
 
             //check for asteroid collisions
-            for (var i = 0; i < roids.length; i++){
-                if(distBetweenPoints(ship.x, ship.y, roids[i].x, roids[i].y) < ship.r + roids[i].r){
-                    explodeShip(); 
+            if(!exploding){
+                for (var i = 0; i < roids.length; i++){
+                    if(distBetweenPoints(ship.x, ship.y, roids[i].x, roids[i].y) < ship.r + roids[i].r){
+                        explodeShip(); 
+                    }
                 }
-            }
 
-            //rotate ship
-            ship.a += ship.rot; 
-            
-             //move ship
-             ship.x += ship.thrust.x; 
-            ship.y += ship.thrust.y; 
+                //rotate ship
+                ship.a += ship.rot; 
+                
+                //move ship
+                ship.x += ship.thrust.x; 
+                ship.y += ship.thrust.y; 
+            }
 
 
             //handle edge of screen 
