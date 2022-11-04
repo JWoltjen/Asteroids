@@ -33,7 +33,7 @@
 
         //set up event handlers
         document.addEventListener("keydown", keyDown);
-        document.addEventListener("keyUp", keyUp); 
+        document.addEventListener("keyup", keyUp); 
 
         //set up game loop to achieve animation
         setInterval(update, 1000 / FPS); 
@@ -78,7 +78,7 @@
             //thrust the ship
             if (ship.thrusting) {
                 ship.thrust.x += SHIP_THRUST * Math.cos(ship.a) / FPS; 
-                ship.thrust.y -= SHIP_THRUST * Math.y(ship.a) / FPS; 
+                ship.thrust.y -= SHIP_THRUST * Math.sin(ship.a) / FPS; 
 
                 //draw thruster
                 ctx.fillStyle = 'red';
@@ -96,7 +96,7 @@
                     ship.y + ship.r * 6/3 * Math.sin(ship.a)
                 ); 
                 ctx.lineTo( 
-                    //rear right of ship
+                    //rear right 
                     ship.x - ship.r * (2/3 * Math.cos(ship.a) - 0.5 * Math.sin(ship.a)),
                     ship.y + ship.r * (2/3 * Math.sin(ship.a) + 0.5 * Math.cos(ship.a))
                 ); 
