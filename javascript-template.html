@@ -22,7 +22,7 @@
         const SHOW_BOUNDING = false; //show or hide collision bounding
         const SHIP_EXPLODE_DUR = 0.3; //duration of the ship's explosion
         const SHIP_INV_DUR = 0.3;//duration of the ship's invisibility
-        const SHIP_BLINK_DUR = 0.1; //duration of the ship's blink during invisiblity in seconds
+        const SHIP_BLINK_DUR = 0.05; //duration of the ship's blink during invisiblity in seconds
 
         /** @type {HTMLCanvasElement} */
         var canv = document.getElementById("gameCanvas"); 
@@ -146,7 +146,7 @@
                 ship.thrust.y -= SHIP_THRUST * Math.sin(ship.a) / FPS; 
 
                 //draw thruster
-                if(!exploding){
+                if(!exploding & blinkOn){
                     ctx.fillStyle = 'red';
                     ctx.strokeStyle = "yellow";
                     ctx.lineWidth = SHIP_SIZE / 10; 
