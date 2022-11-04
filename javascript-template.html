@@ -17,7 +17,7 @@
         const ROIDS_SIZE = 100 //starting size of asteroids in pixels 
         const ROIDS_SPD = 50; //max starting speed of asteroids in pixels per second
         const ROIDS_VERT = 10; //average number of vertices on each starting asteroid
-        const ROIDS_JAG = 0.4; //jaggedness of the asteroids (0 = none, 1 = lots of jaggedness)
+        const ROIDS_JAG = 0.2; //jaggedness of the asteroids (0 = none, 1 = lots of jaggedness)
 
         /** @type {HTMLCanvasElement} */
         var canv = document.getElementById("gameCanvas"); 
@@ -209,8 +209,20 @@
                 ctx.stroke(); 
 
                 //move the asteroid
+                roids[i].x += roids[i].xv; 
+                roids[i].y += roids[i].yv; 
 
                 //handle edge of screen
+                if(roids[i].x < 0 - roids[i].r){
+                    roids[i].x = canv.width + roids[i].r; 
+                } else if (roids[i].x > canv.width + roids[i].r){
+                    roids[i].x = 0 -roids[i].r
+                }
+                if(roids[i].y < 0 - roids[i].r){
+                    roids[i].y = canv.height + roids[i].r; 
+                } else if (roids[i].y > canv.height + roids[i].r){
+                    roids[i].y = 0 -roids[i].r
+                }
             }
 
 
