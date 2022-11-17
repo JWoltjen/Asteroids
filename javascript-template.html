@@ -14,12 +14,12 @@
         const TURN_SPEED = 360; //turn speed in degrees per second 
         const SHIP_THRUST = 5; // acceleration of the ship in pixels per second per second
         const ROIDS_NUM = 3; //starting number of asteroids
-        const ROIDS_SIZE = 100 //starting size of asteroids in pixels 
+        const ROID_SIZE = 100 //starting size of asteroids in pixels 
         const ROIDS_SPD = 50; //max starting speed of asteroids in pixels per second
         const ROIDS_VERT = 10; //average number of vertices on each starting asteroid
         const ROIDS_JAG = 0.2; //jaggedness of the asteroids (0 = none, 1 = lots of jaggedness)
         const SHOW_CENTRE_DOT = false; //show or hide center box for ship
-        const SHOW_BOUNDING = false; //show or hide collision bounding
+        const SHOW_BOUNDING = true; //show or hide collision bounding
         const SHIP_EXPLODE_DUR = 0.3; //duration of the ship's explosion
         const SHIP_INV_DUR = 0.3;//duration of the ship's invisibility
         const SHIP_BLINK_DUR = 0.05; //duration of the ship's blink during invisiblity in seconds
@@ -52,9 +52,28 @@
                 do {
                 x = Math.floor(Math.random() * canv.width); 
                 y = Math.floor(Math.random() * canv.height); 
-                } while (distBetweenPoints(ship.x, ship.y, x, y) < ROIDS_SIZE * 2 + ship.r)
-                roids.push(newAsteroid(x, y)); 
+                } while (distBetweenPoints(ship.x, ship.y, x, y) < ROID_SIZE * 2 + ship.r)
+                roids.push(newAsteroid(x, y, Math.ceil(ROID_SIZE / 2))); 
             }
+        }
+
+        function destroyAsteroid(index){
+            let x = roids[index].x; 
+            let y = roids[index].y; 
+            let r = roids[index].r; 
+
+            //split the asteroid in two if necessary
+            if (r == Math.ceil(ROID_SIZE / 2)){
+                console.log("r of ROID_SIZE/2 has been hit")
+                roids.push(newAsteroid(x, y, Math.ceil(ROID_SIZE / 4)))
+                roids.push(newAsteroid(x, y, Math.ceil(ROID_SIZE / 4)))
+            } else if (r == Math.ceil(ROID_SIZE / 4)){
+                roids.push(newAsteroid(x, y, Math.ceil(ROID_SIZE / 8)))
+                roids.push(newAsteroid(x, y, Math.ceil(ROID_SIZE / 8)))
+            }
+
+            //destroy the asteroid 
+            roids.splice(index, 1); 
         }
 
         function distBetweenPoints(x1, y1, x2, y2){
@@ -62,6 +81,7 @@
         }
 
         function explodeShip(){
+           
            ship.explodeTime = Math.ceil(SHIP_EXPLODE_DUR * FPS); 
         }
 
@@ -103,13 +123,13 @@
             }
         }
 
-        function newAsteroid(x, y){
+        function newAsteroid(x, y, r){
             let roid = {
                 x: x, 
                 y: y, 
                 xv: Math.random() * ROIDS_SPD / FPS * (Math.random() < 0.5 ? 1 : -1), 
                 yv: Math.random() * ROIDS_SPD / FPS * (Math.random() < 0.5 ? 1 : -1), 
-                r: ROIDS_SIZE / 2, 
+                r: ROID_SIZE / 2, 
                 a: Math.random() * Math.PI * 2, // in radians
                 vert: Math.floor(Math.random() * (ROIDS_VERT + 1) + ROIDS_VERT /2),
                 offs: []
@@ -166,6 +186,43 @@
             ctx.fillStyle = "black"
             ctx.fillRect(0, 0, canv.width, canv.height); 
 
+            //draw the asteroids
+            let x, y, r, a, vert, offs;
+            for (let i = 0; i < roids.length; i++){
+                ctx.strokeStyle = 'slategrey'; 
+                ctx.lineWidth = SHIP_SIZE / 20;
+                //get the asteroid properties
+                x = roids[i].x; 
+                y = roids[i].y; 
+                r = roids[i].r; 
+                a = roids[i].a; 
+                vert = roids[i].vert; 
+                offs = roids[i].offs; 
+                //draw a path
+                ctx.beginPath();
+                ctx.moveTo(
+                    x + r * offs[0]* Math.cos(a), 
+                    y + r * offs[0]* Math.sin(a)
+                ); 
+
+                //draw the polygon
+                for (let j = 1; j < vert; j++){
+                    ctx.lineTo(
+                        x + r * offs[j] * Math.cos(a + j * Math.PI * 2 / vert),
+                        y + r * offs[j] * Math.sin(a + j * Math.PI * 2 / vert),
+                    );
+                }
+                ctx.closePath(); 
+                ctx.stroke(); 
+
+                if(SHOW_BOUNDING){
+                    ctx.strokeStyle = "lime"; 
+                    ctx.beginPath(); 
+                    ctx.arc(x, y, r, 0, Math.PI * 2, false);
+                    ctx.stroke(); 
+                }
+            }
+
             //thrust the ship
             if (ship.thrusting) {
                 ship.thrust.x += SHIP_THRUST * Math.cos(ship.a) / FPS; 
@@ -196,9 +253,8 @@
                     ctx.fill();
                     ctx.stroke(); 
                 }
-
-
             } else {
+                // apply friction to the ship
                 ship.thrust.x -= FRICTION * ship.thrust.x /FPS
                 ship.thrust.y -= FRICTION * ship.thrust.y /FPS
             }
@@ -228,7 +284,6 @@
                     ctx.closePath(); //completes triangle
                     ctx.stroke(); 
                 } 
-
                 //handle blinking
                 if(ship.blinkNum > 0){
                     //reduce blink time
@@ -263,47 +318,6 @@
                 ctx.fill();
             }
 
-            //draw the asteroids
-            
-            let x, y, r, a, vert, offs;
-            for (let i = 0; i < roids.length; i++){
-                ctx.strokeStyle = 'slategrey'; 
-            ctx.lineWidth = SHIP_SIZE / 20;
-                //get the asteroid properties
-                x = roids[i].x; 
-                y = roids[i].y; 
-                r = roids[i].r; 
-                a = roids[i].a; 
-                vert = roids[i].vert; 
-                offs = roids[i].offs; 
-                //draw a path
-                ctx.beginPath();
-                ctx.moveTo(
-                    x + r * offs[0]* Math.cos(a), 
-                    y + r * offs[0]* Math.sin(a)
-                ); 
-
-                //draw the polygon
-                for (let j = 1; j < vert; j++){
-                    ctx.lineTo(
-                        x + r * offs[j] * Math.cos(a + j * Math.PI * 2 / vert),
-                        y + r * offs[j] * Math.sin(a + j * Math.PI * 2 / vert),
-
-                    );
-                }
-                ctx.closePath(); 
-                ctx.stroke(); 
-
-                if(SHOW_BOUNDING){
-                    ctx.strokeStyle = "lime"; 
-                    ctx.beginPath(); 
-                    ctx.arc(x, y, r, 0, Math.PI * 2, false);
-                    ctx.stroke(); 
-            }
-
-                
-            }
-
             //show collision bounding
             if(SHOW_BOUNDING){
                 ctx.strokeStyle = "lime"; 
@@ -327,7 +341,6 @@
 
             //detect laser hits on asteroids
             var ax, ay, ar, lx, ly; 
-
             for (var i = roids.length - 1; i >= 0; i--){
                 //grab the asteroid properties
                 ax = roids[i].x; 
@@ -347,7 +360,7 @@
                         ship.lasers.splice(j, 1); 
 
                         //remove the asteroid
-                        roids.splice(i, 1); 
+                        destroyAsteroid(i);
 
                         break; 
                     }
@@ -365,9 +378,11 @@
                 for (var i = 0; i < roids.length; i++){
                     if(distBetweenPoints(ship.x, ship.y, roids[i].x, roids[i].y) < ship.r + roids[i].r){
                         explodeShip(); 
+                        destroyAsteroid(i);
+                        break;
                     }
+                  }
                 }
-            }
 
                 //rotate ship
                 ship.a += ship.rot; 
@@ -375,7 +390,6 @@
                 //move ship
                 ship.x += ship.thrust.x; 
                 ship.y += ship.thrust.y; 
-            
             } else {
                 ship.explodeTime--;
 
@@ -415,7 +429,7 @@
                 //handle edge of screen
                 if(ship.lasers[i].x < 0){
                     ship.lasers[i].x = canv.width
-                } else if ( ship.lasers[i].x > canv.width){
+                } else if (ship.lasers[i].x > canv.width){
                     ship.lasers[i].x = 0;
                 }
                 if(ship.lasers[i].y < 0){
